@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View, TouchableOpacity, Text, ScrollView, Image, Linking } from "react-native";
+import { StyleSheet, View, TouchableOpacity, Text, Image, Linking } from "react-native";
 import { Feather as Icon, FontAwesome } from '@expo/vector-icons';
 import { useNavigation, useRoute } from '@react-navigation/native';
-import { SvgUri } from "react-native-svg";
 import { RectButton } from 'react-native-gesture-handler';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as MailComposer from 'expo-mail-composer';
+
 import api from '../../services/api';
 
 interface Params{
@@ -33,13 +33,9 @@ const Detail = () => {
   const navigation = useNavigation();
   const route = useRoute();
 
-  const [point, setPoint] = useState<Point>({} as Point);
-
   const routeParams = route.params as Params;
 
-  function handleNavigateBack(){
-    navigation.goBack();
-  }
+  const [point, setPoint] = useState<Point>({} as Point);
 
   useEffect(() => {//setPoint
     api.get(`points/${routeParams.pointId}`).then(res => {
@@ -49,6 +45,10 @@ const Detail = () => {
 
   if(!point.point){
     return null;
+  }
+
+  function handleNavigateBack(){
+    navigation.goBack();
   }
 
   function handleComposeEmail() {
@@ -81,7 +81,7 @@ const Detail = () => {
         </View>
       </View>
 
-      <View style={styles.footer}>
+      <View style={styles.footer}>{/* Contact buttons */}
         <RectButton style={styles.button} onPress={handleWhatsapp}>
           <FontAwesome name="whatsapp" size={20} color="#FFF" />
           <Text style={styles.buttonText}>WhatsApp</Text>
