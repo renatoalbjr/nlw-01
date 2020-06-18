@@ -1,17 +1,17 @@
 import React, { useState } from 'react';
 import { View, Image, ImageBackground, StyleSheet, Text, TextInput, KeyboardAvoidingView, Platform } from 'react-native';
-import { RectButton, FlatList } from 'react-native-gesture-handler';
+import { RectButton } from 'react-native-gesture-handler';
 import { Feather as Icon } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native'
 
 const Home = () => {
 	const navigation = useNavigation();
 
-	const [fedState, setFedState] = useState("");
+	const [state, setState] = useState("");
 	const [city, setCity] = useState("");
 
-	function handleNavigateToPoints(fedState: string, city: string){
-		navigation.navigate('Points', {fedState, city});
+	function handleNavigateToPoints(state: string, city: string){
+		navigation.navigate('Points', {state, city});
 	}
 
 	return (
@@ -36,19 +36,20 @@ const Home = () => {
 					<TextInput 
 						style={styles.input} 
 						placeholder='Estado (Sigla)' 
-						onChangeText={text => setFedState(text)} 
+						onChangeText={setState} 
 						autoCapitalize="characters"
 						autoCorrect={false}
 						maxLength={2}
-						value={fedState}
+						value={state}
 					/>
 					<TextInput 
 						style={styles.input} 
 						placeholder='Cidade' 
 						autoCorrect={false}
-						onChangeText={setCity} 
+						onChangeText={setCity}
+						value={city}
 					/>
-					<RectButton style={styles.button} onPress={() => handleNavigateToPoints(fedState, city)}>
+					<RectButton style={styles.button} onPress={() => handleNavigateToPoints(state, city)}>
 						<View style={styles.buttonIcon}>
 							<Icon name="arrow-right" color="#FFF" size={24} />
 						</View>
