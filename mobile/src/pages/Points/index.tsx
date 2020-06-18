@@ -26,31 +26,21 @@ interface Point{
 }
 
 interface Params{
-  fedState: string,
+  state: string,
   city: string
 }
 
 const Points = () => {
-  const [items, setItems] = useState<Item[]>([]);
-  const [points, setPoints] = useState<Point[]>([]);
-  const [selectedItems, setSelectedItems] = useState<number[]>([]);
-  const [initialRegion, setInitialRegion] = useState<Region>();
-  //const [selectedRegion, setSelectedRegion] = useState<Region>();
-
   const navigation = useNavigation();
   const routes = useRoute();
 
   const routeParam = routes.params as Params;
+  
+  const [initialRegion, setInitialRegion] = useState<Region>();
+  const [points, setPoints] = useState<Point[]>([]);
+  const [items, setItems] = useState<Item[]>([]);
 
-  useEffect(() => {//setItems
-    (async function (){
-      setItems((await api.get('items')).data);
-    })();
-  }, []);
-
-  useEffect(() => {//setSelectedItems
-    setSelectedItems(items.map(item => item.id));
-  }, [items]);
+  const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
   useEffect(() => {//setInitialRegion
     (async function (){
@@ -73,15 +63,21 @@ const Points = () => {
     })();
   }, []);
 
-  /* useEffect(() => {//setSelectedRegions
-    setSelectedRegion(initialRegion);
-  }, [initialRegion]); */
+  useEffect(() => {//setItems
+    (async function (){
+      setItems((await api.get('items')).data);
+    })();
+  }, []);
+
+  useEffect(() => {//setSelectedItems
+    setSelectedItems(items.map(item => item.id));
+  }, [items]);
 
   useEffect(() => {//setPoints
     api.get('points', {
       params: {
         city: routeParam.city,
-        uf: routeParam.fedState,
+        uf: routeParam.state,
         items: selectedItems
       }
     }).then(res => {
@@ -98,15 +94,12 @@ const Points = () => {
   };
 
   function handleItemFilterSelection(id: number) {
-    if(selectedItems.includes(id))
+    if(selectedItems.includes(id)){
       setSelectedItems(selectedItems.filter(item => item !== id));
-    else
-      setSelectedItems([...selectedItems, id]);
+      return;
+    }
+    setSelectedItems([...selectedItems, id]);
   };
-
-/*   function handleRegionChangeComplete(reg: Region) {
-    setSelectedRegion(reg);
-  } */
 
   return (
     <SafeAreaView style={{flex: 1}}>
@@ -122,19 +115,18 @@ const Points = () => {
           <MapView 
             style={styles.map}
             initialRegion={initialRegion}
-            /* onRegionChangeComplete={handleRegionChangeComplete} */
           >
             {points.map(point => {
               const pointInfo = point.point;
               return (
                 <Marker
-                style={styles.mapMarker}
-                coordinate={{
-                  latitude: pointInfo.latitude,
-                  longitude: pointInfo.longitude
-                }}
-                onPress={() => handleNavigateToDetail(point.point.id)}
-                key={String(pointInfo.id)}
+                  style={styles.mapMarker}
+                  coordinate={{
+                    latitude: pointInfo.latitude,
+                    longitude: pointInfo.longitude
+                  }}
+                  onPress={() => handleNavigateToDetail(point.point.id)}
+                  key={String(pointInfo.id)}
                 >
                   <View style={styles.mapMarkerContainer}>
                     <Image style={styles.mapMarkerImage} source={{ uri: pointInfo.image_url }} />
@@ -150,9 +142,9 @@ const Points = () => {
 
       <View style={styles.itemsContainer}>
         <ScrollView 
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{ padding: 20 }}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ padding: 20 }}
         >
           {
             items.map(item => (
