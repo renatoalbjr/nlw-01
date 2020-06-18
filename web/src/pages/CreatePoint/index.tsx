@@ -38,7 +38,8 @@ interface IBGECity {
 }
 
 const CreatePoint = () => {
-    const [initialPosition, setInitialPosition] = useState<[number, number]>([0, 0]);
+    const [initialPosition, setInitialPosition] = useState<[number, number]>([-14.2853653, -50.7650227]);
+    const [initialMapZoom, setInitialMapZoom] = useState(3);
     const [states, setStates] = useState<State[]>([]);
     const [cities, setCities] = useState<City[]>([]);
     const [items, setItems] = useState<Item[]>([]);
@@ -46,12 +47,12 @@ const CreatePoint = () => {
     const [uploadedFile, setUploadedFile] = useState<File>();
 
     const [formData, setFormData] = useState({
-            name: '',
-            email: '',
-            whatsapp: ''
-        });
+        name: '',
+        email: '',
+        whatsapp: ''
+    });
 
-    const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0, 0]);
+    const [selectedPosition, setSelectedPosition] = useState<[number, number]>([-14.2853653, -50.7650227]);
     const [selectedState, setSelectedState] = useState("0");
     const [selectedCity, setSelectedCity] = useState("0");
 
@@ -65,6 +66,11 @@ const CreatePoint = () => {
                 position.coords.latitude,
                 position.coords.longitude
             ]);
+            setSelectedPosition([
+                position.coords.latitude,
+                position.coords.longitude
+            ]);
+            setInitialMapZoom(15);
         });
     }, []);
     
@@ -78,7 +84,7 @@ const CreatePoint = () => {
                     initials: state.sigla
                 }
             }));
-        })
+        });
     }, []);
     
     useEffect(() => {//get cities from IBGE
@@ -95,7 +101,7 @@ const CreatePoint = () => {
                     name: city.nome
                 };
             }));
-        })
+        });
     }, [selectedState]);
     
     useEffect(() => {//get items from api
@@ -125,14 +131,11 @@ const CreatePoint = () => {
     }
 
     function handleItemSelection(id: number){
-        const alreadySelected = selectedItems.findIndex(item => item === id);
-        if(alreadySelected >= 0){
-            const filteredItems = selectedItems.filter(item => item !== id);
-            setSelectedItems(filteredItems);
+        if(selectedItems.includes(id)){
+            setSelectedItems(selectedItems.filter(item => item !== id));
+            return;
         }
-        else {
-            setSelectedItems([...selectedItems, id]);
-        }
+        setSelectedItems([...selectedItems, id]);
     }
 
     async function handleSubmit(event: FormEvent) {
@@ -217,7 +220,7 @@ const CreatePoint = () => {
                         <span>Selecione o endereço no mapa</span>
                     </legend>
 
-                    <Map center={initialPosition} zoom={15} onClick={handlePositionSelection}>
+                    <Map center={initialPosition} zoom={initialMapZoom} onClick={handlePositionSelection}>
                         <TileLayer
                             url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                             attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
