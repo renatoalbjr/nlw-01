@@ -1,6 +1,6 @@
 import React, { useEffect, useState, ChangeEvent, FormEvent } from 'react';
-import { Link, useHistory } from 'react-router-dom'
-import { Map, Marker, TileLayer} from 'react-leaflet'
+import { Link, useHistory } from 'react-router-dom';
+import { Map, Marker, TileLayer} from 'react-leaflet';
 import { LeafletMouseEvent } from 'leaflet';
 import axios from 'axios';
 
@@ -8,7 +8,7 @@ import { FiArrowLeft } from 'react-icons/fi'
 
 import api from '../../services/api'
 import './styles.css';
-import logo from '../../assets/logo.svg'
+import logo from '../../assets/logo.svg';
 import Dropzone from '../../components/Dropzone';
 
 interface Item {
@@ -17,7 +17,7 @@ interface Item {
     image_url: string,
 }
 
-interface FedState {
+interface State {
     id: number,
     initials: string
 }
@@ -27,7 +27,7 @@ interface City {
     name: string
 }
 
-interface IBGEFedState {
+interface IBGEState {
     id: number,
     sigla: string
 }
@@ -38,55 +38,56 @@ interface IBGECity {
 }
 
 const CreatePoint = () => {
-    const [items, setItems] = useState<Item[]>([]);
-    const [fedStates, setFedStates] = useState<FedState[]>([]);
-    const [cities, setCities] = useState<City[]>([]);
-
     const [initialPosition, setInitialPosition] = useState<[number, number]>([0, 0]);
+    const [states, setStates] = useState<State[]>([]);
+    const [cities, setCities] = useState<City[]>([]);
+    const [items, setItems] = useState<Item[]>([]);
 
-    const [selectedFedState, setSelectedFedState] = useState("0");
-    const [selectedCity, setSelectedCity] = useState("0");
-    const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0, 0]);
-    const [selectedItems, setSelectedItems] = useState<number[]>([]);
     const [uploadedFile, setUploadedFile] = useState<File>();
 
     const [formData, setFormData] = useState({
-        name: '',
-        email: '',
-        whatsapp: ''
-    })
+            name: '',
+            email: '',
+            whatsapp: ''
+        });
+
+    const [selectedPosition, setSelectedPosition] = useState<[number, number]>([0, 0]);
+    const [selectedState, setSelectedState] = useState("0");
+    const [selectedCity, setSelectedCity] = useState("0");
+
+    const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
     const history = useHistory();
-
-    //get items from api
-    useEffect(() => {
-        api.get('items').then(res => {
-            setItems(res.data);
+    
+    useEffect(() => {//get current position from navigator
+        navigator.geolocation.getCurrentPosition(position => {
+            setInitialPosition([
+                position.coords.latitude,
+                position.coords.longitude
+            ]);
         });
     }, []);
-
-    //get fedStates from IBGE
-    useEffect(() => {
+    
+    useEffect(() => {//get states from IBGE
         axios
-        .get<IBGEFedState[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
+        .get<IBGEState[]>('https://servicodados.ibge.gov.br/api/v1/localidades/estados')
         .then(res => {
-            setFedStates(res.data.map<FedState>(uf => {
+            setStates(res.data.map<State>(state => {
                 return {
-                    id: uf.id,
-                    initials: uf.sigla
+                    id: state.id,
+                    initials: state.sigla
                 }
             }));
         })
     }, []);
-
-    //get cities from IBGE
-    useEffect(() => {
-        if(selectedFedState === '0') {
+    
+    useEffect(() => {//get cities from IBGE
+        if(selectedState === '0') {
             setCities([]);
             return;
         }
         axios
-        .get<IBGECity[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedFedState}/municipios`)
+        .get<IBGECity[]>(`https://servicodados.ibge.gov.br/api/v1/localidades/estados/${selectedState}/municipios`)
         .then(res => {
             setCities(res.data.map<City>(city => {
                 return {
@@ -95,17 +96,11 @@ const CreatePoint = () => {
                 };
             }));
         })
-    }, [selectedFedState]);
-
-    //get current position from navigator
-    useEffect(() => {
-        navigator.geolocation.getCurrentPosition(position => {
-            setInitialPosition([
-                position.coords.latitude,
-                position.coords.longitude
-            ])
-        }, error => {
-            setInitialPosition([-16.7166549,-49.314579]);
+    }, [selectedState]);
+    
+    useEffect(() => {//get items from api
+        api.get('items').then(res => {
+            setItems(res.data);
         });
     }, []);
 
@@ -114,48 +109,19 @@ const CreatePoint = () => {
         setFormData({...formData, [name]: value});
     }
 
-    function handleFedStateSelection(event: ChangeEvent<HTMLSelectElement>) {
-        setSelectedFedState(event.target.value);
-    }
-
-    function handleCitySelection(event: ChangeEvent<HTMLSelectElement>) {
-        setSelectedCity(event.target.value);
-    }
-
     function handlePositionSelection(event: LeafletMouseEvent) {
         setSelectedPosition([
             event.latlng.lat,
             event.latlng.lng
-        ])
+        ]);
     }
 
-    async function handleSubmit(event: FormEvent) {
-        event.preventDefault();
+    function handleStateSelection(event: ChangeEvent<HTMLSelectElement>) {
+        setSelectedState(event.target.value);
+    }
 
-        const { name, email, whatsapp } = formData;
-        const uf = selectedFedState;
-        const city = selectedCity;
-        const [latitude, longitude] = selectedPosition;
-        const items = selectedItems;
-
-        const data = new FormData();
-
-        data.append('name', name);
-        data.append('email', email);
-        data.append('whatsapp', whatsapp);
-        data.append('uf', uf);
-        data.append('city', city);
-        data.append('latitude', String(latitude));
-        data.append('longitude', String(longitude));
-        data.append('items', items.join(', '));
-
-        if(uploadedFile) data.append('image', uploadedFile);
-
-        await api.post('points', data);
-
-        alert('Ponto de Coleta criado!');
-
-        history.push('/');
+    function handleCitySelection(event: ChangeEvent<HTMLSelectElement>) {
+        setSelectedCity(event.target.value);
     }
 
     function handleItemSelection(id: number){
@@ -167,6 +133,32 @@ const CreatePoint = () => {
         else {
             setSelectedItems([...selectedItems, id]);
         }
+    }
+
+    async function handleSubmit(event: FormEvent) {
+        event.preventDefault();
+
+        const { name, email, whatsapp } = formData;
+        const [latitude, longitude] = selectedPosition;
+
+        const data = new FormData();
+
+        data.append('name', name);
+        data.append('email', email);
+        data.append('whatsapp', whatsapp);
+        data.append('uf', selectedState);
+        data.append('city', selectedCity);
+        data.append('latitude', String(latitude));
+        data.append('longitude', String(longitude));
+        data.append('items', selectedItems.join(', '));
+
+        if(uploadedFile) data.append('image', uploadedFile);
+
+        await api.post('points', data);
+
+        alert('Ponto de Coleta criado!');
+
+        history.push('/');
     }
 
     return (
@@ -188,32 +180,32 @@ const CreatePoint = () => {
                     <legend>
                         <h2>Dados</h2>
                     </legend>
-                    <div className="field">
+                    <div className="field">{/* Nome */}
                         <label htmlFor="name">Nome da entidade</label>
                         <input
-                        type="text"
-                        name="name"
-                        id="name"
-                        onChange={handleInputChange}
+                            type="text"
+                            name="name"
+                            id="name"
+                            onChange={handleInputChange}
                         />
                     </div>
                     <div className="field-group">
-                        <div className="field">
+                        <div className="field">{/* E-mail */}
                             <label htmlFor="email">E-mail</label>
                             <input
-                            type="email"
-                            name="email"
-                            id="email"
-                            onChange={handleInputChange}
+                                type="email"
+                                name="email"
+                                id="email"
+                                onChange={handleInputChange}
                             />
                         </div>
-                        <div className="field">
+                        <div className="field">{/* WhatsApp */}
                             <label htmlFor="whatsapp">WhatsApp</label>
                             <input
-                            type="text"
-                            name="whatsapp"
-                            id="whatsapp"
-                            onChange={handleInputChange}
+                                type="text"
+                                name="whatsapp"
+                                id="whatsapp"
+                                onChange={handleInputChange}
                             />
                         </div>
                     </div>
@@ -234,16 +226,16 @@ const CreatePoint = () => {
                     </Map>
 
                     <div className="field-group">
-                        <div className="field">
+                        <div className="field">{/* Estado */}
                             <label htmlFor="FedState">Estado</label>
-                            <select name="FedState" id="FedState" value={selectedFedState} onChange={handleFedStateSelection}>
+                            <select name="FedState" id="FedState" value={selectedState} onChange={handleStateSelection}>
                                 <option value="0">Selecione um estado</option>
-                                {fedStates.map(fedState => (
-                                    <option value={fedState.initials} key={fedState.id}>{fedState.initials}</option>
+                                {states.map(state => (
+                                    <option value={state.initials} key={state.id}>{state.initials}</option>
                                 ))}  
                             </select>
                         </div>
-                        <div className="field">
+                        <div className="field">{/* Cidade */}
                             <label htmlFor="city">Cidade</label>
                             <select name="city" id="city" value={selectedCity} onChange={handleCitySelection}>
                                 <option value="0">Selecione uma cidade</option>
@@ -251,8 +243,7 @@ const CreatePoint = () => {
                                     <option value={city.name} key={city.id}>{city.name}</option>
                                 ))}
                             </select>
-                        </div>
-                        
+                        </div>  
                     </div>
                 </fieldset>
 
@@ -265,9 +256,9 @@ const CreatePoint = () => {
                     <ul className="items-grid">
                         {items.map(item => (
                             <li 
-                            key={item.id} 
-                            className={selectedItems.includes(item.id) ? 'selected' : ''}
-                            onClick={() => handleItemSelection(item.id)}
+                                key={item.id} 
+                                className={selectedItems.includes(item.id) ? 'selected' : ''}
+                                onClick={() => handleItemSelection(item.id)}
                             >
                                 <img src={item.image_url} alt={item.title}/>
                                 <span>{item.title}</span>
