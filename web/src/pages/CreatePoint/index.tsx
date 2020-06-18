@@ -256,7 +256,7 @@ const CreatePoint = () => {
                         <span>Selecione um ou mais itens de coleta</span>
                     </legend>
 
-                    <ul className="items-grid">
+                    <ul className="items">
                         {items.map(item => (
                             <li 
                                 key={item.id} 
