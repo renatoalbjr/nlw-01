@@ -183,16 +183,18 @@ const CreatePoint = () => {
                     <legend>
                         <h2>Dados</h2>
                     </legend>
-                    <div className="field">{/* Nome */}
-                        <label htmlFor="name">Nome da entidade</label>
-                        <input
-                            type="text"
-                            name="name"
-                            id="name"
-                            onChange={handleInputChange}
-                        />
-                    </div>
-                    <div className="field-group">
+                    
+                    <div className="fieldset-content">
+                        <div className="field name-field">{/* Nome */}
+                            <label htmlFor="name">Nome da entidade</label>
+                            <input
+                                type="text"
+                                name="name"
+                                id="name"
+                                onChange={handleInputChange}
+                            />
+                        </div>
+                    
                         <div className="field">{/* E-mail */}
                             <label htmlFor="email">E-mail</label>
                             <input
@@ -202,6 +204,7 @@ const CreatePoint = () => {
                                 onChange={handleInputChange}
                             />
                         </div>
+
                         <div className="field">{/* WhatsApp */}
                             <label htmlFor="whatsapp">WhatsApp</label>
                             <input
@@ -210,8 +213,9 @@ const CreatePoint = () => {
                                 id="whatsapp"
                                 onChange={handleInputChange}
                             />
-                        </div>
+                        </div>                
                     </div>
+
                 </fieldset>
 
                 <fieldset>{/* Endereço */}
@@ -220,24 +224,26 @@ const CreatePoint = () => {
                         <span>Selecione o endereço no mapa</span>
                     </legend>
 
-                    <Map center={initialPosition} zoom={initialMapZoom} onClick={handlePositionSelection}>
-                        <TileLayer
-                            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                            attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
-                        />
-                        <Marker position={selectedPosition} />
-                    </Map>
-
-                    <div className="field-group">
+                    <div className="fieldset-content">
+                        
+                        <Map center={initialPosition} zoom={initialMapZoom} onClick={handlePositionSelection}>
+                            <TileLayer
+                                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+                                attribution="&copy; <a href=&quot;http://osm.org/copyright&quot;>OpenStreetMap</a> contributors"
+                            />
+                            <Marker position={selectedPosition} />
+                        </Map>
+                        
                         <div className="field">{/* Estado */}
-                            <label htmlFor="FedState">Estado</label>
-                            <select name="FedState" id="FedState" value={selectedState} onChange={handleStateSelection}>
+                            <label htmlFor="state">Estado</label>
+                            <select name="state" id="state" value={selectedState} onChange={handleStateSelection}>
                                 <option value="0">Selecione um estado</option>
                                 {states.map(state => (
                                     <option value={state.initials} key={state.id}>{state.initials}</option>
                                 ))}  
                             </select>
                         </div>
+
                         <div className="field">{/* Cidade */}
                             <label htmlFor="city">Cidade</label>
                             <select name="city" id="city" value={selectedCity} onChange={handleCitySelection}>
@@ -247,6 +253,7 @@ const CreatePoint = () => {
                                 ))}
                             </select>
                         </div>  
+                    
                     </div>
                 </fieldset>
 

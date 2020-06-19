@@ -10,6 +10,7 @@
 
   display: flex;
   justify-content: space-between;
+  flex-flow: wrap;
   align-items: center;
 }
 
@@ -20,6 +21,8 @@
 
   display: flex;
   align-items: center;
+
+  margin-left: 160px;
 }
 
 #page-create-point header a svg {
@@ -66,9 +69,10 @@
   color: var(--text-color);
 }
 
-#page-create-point form .field-group {
-  flex: 1;
+#page-create-point form .fieldset-content {
   display: flex;
+  flex-wrap: wrap;
+  justify-content: space-around;
 }
 
 #page-create-point form .field {
@@ -76,12 +80,15 @@
 
   display: flex;
   flex-direction: column;
-  margin-bottom: 24px;
+
+  margin: 8px;
 }
 
-#page-create-point form .field input[type=text],
-#page-create-point form .field input[type=email],
-#page-create-point form .field input[type=number] {
+#page-create-point form .name-field {
+  flex-basis: 100%;
+}
+
+#page-create-point form .field input {
   flex: 1;
   background: #F0F0F5;
   border-radius: 8px;
@@ -89,6 +96,10 @@
   padding: 16px 24px;
   font-size: 16px;
   color: #6C6C80;
+}
+
+#page-create-point form .field input::placeholder {
+  color: #A0A0B2;
 }
 
 #page-create-point form .field select {
@@ -104,10 +115,6 @@
   color: #6C6C80;
 }
 
-#page-create-point form .field input::placeholder {
-  color: #A0A0B2;
-}
-
 #page-create-point form .field label {
   font-size: 14px;
   margin-bottom: 8px;
@@ -115,14 +122,6 @@
 
 #page-create-point form .field :disabled {
   cursor: not-allowed;
-}
-
-#page-create-point form .field-group .field + .field {
-  margin-left: 24px;
-}
-
-#page-create-point form .field-group input + input {
-  margin-left: 24px;
 }
 
 #page-create-point form .field-check {
@@ -166,14 +165,13 @@
 
 .items {
   display: flex;
-  flex-flow: row wrap;
+  flex-wrap: wrap;
   justify-content: space-around;
-  gap: 16px;
 }
 
 .items li {
   flex-basis: 180px;
-  
+
   background: #f5f5f5;
   border: 2px solid #f5f5f5;
   height: 180px;
@@ -188,14 +186,14 @@
   text-align: center;
 
   cursor: pointer;
+
+  margin: 8px;
 }
 
 .items li span {
   flex: 1;
   margin-top: 12px;
 
-  display: flex;
-  align-items: center;
   color: var(--title-color)
 }
 
