@@ -4,19 +4,25 @@ import { Request, Response } from 'express';
 class PointsController {
     
     async index(req: Request, res: Response) {
-        const {city, uf, items} = req.query;
+        const {city, uf, items} = req.query;        
         
-        const parsedItems = String(items)
+        const query = knex('points').join('point_items', 'points.id', '=', 'point_items.point_id');
+
+        if(items){
+            const parsedItems = String(items)
             .split(',')
             .map(item => { return Number(item.trim()) });
 
-        const points = await knex('points')
-            .join('point_items', 'points.id', '=', 'point_items.point_id')
-            .whereIn('item_id', parsedItems)
-            .where('points.city', String(city))
-            .where('points.uf', String(uf))
-            .select('points.*')
-            .distinct();
+            query.whereIn('item_id', parsedItems);
+        }
+            
+        if(city) query.where('points.city', String(city));
+
+        if(uf) query.where('points.uf', String(uf));
+        
+        query.select('points.*').distinct();
+        
+        const points = await query;
 
         let serializedPointsVar = [];
 
