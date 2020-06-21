@@ -4,7 +4,7 @@ import { Map, Marker, TileLayer} from 'react-leaflet';
 import { LeafletMouseEvent } from 'leaflet';
 import axios from 'axios';
 
-import { FiArrowLeft } from 'react-icons/fi'
+import { FiArrowLeft, FiCheckCircle, FiXOctagon } from 'react-icons/fi'
 
 import api from '../../services/api'
 import './styles.css';
@@ -58,7 +58,12 @@ const CreatePoint = () => {
 
     const [selectedItems, setSelectedItems] = useState<number[]>([]);
 
+    const [isSubmitted, setIsSubmitted] = useState(false);
+    const [submitSuccess, setSubmitSuccess] = useState(false);
+
     const history = useHistory();
+
+    const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
     
     useEffect(() => {//get current position from navigator
         navigator.geolocation.getCurrentPosition(position => {
@@ -157,15 +162,38 @@ const CreatePoint = () => {
 
         if(uploadedFile) data.append('image', uploadedFile);
 
-        await api.post('points', data);
-
-        alert('Ponto de Coleta criado!');
-
-        history.push('/');
+        api.post('points', data).then(async () => {
+            setIsSubmitted(true);
+            setSubmitSuccess(true);
+            await delay(3000);
+            history.push('/');
+        }, async () => {
+            setIsSubmitted(true);
+            await delay(3000); 
+            setIsSubmitted(false);
+        });
+        
     }
 
     return (
         <div id="page-create-point">
+            <div className={['pop-box', isSubmitted ? '' : 'display-none'].join(' ')}>
+                {
+                    submitSuccess ? (
+                        <div className="pop-box-content">
+                            <FiCheckCircle size={64}/>
+                            <span>Cadastro concluído!</span>                    
+                        </div>
+                    )
+                    :(
+                        <div className="pop-box-content">
+                            <FiXOctagon size={64}/>
+                            <span>Tente novamente mais tarde!</span>    
+                        </div>
+                    )
+                }
+            </div>
+
             <header>
                 <img src={logo} alt="Ecoleta"/>
 
@@ -174,6 +202,7 @@ const CreatePoint = () => {
                     Voltar para home
                 </Link>
             </header>
+            
             <form onSubmit={handleSubmit}>
                 <h1>Cadastro do <br/> ponto de Coleta</h1>
 
@@ -276,6 +305,7 @@ const CreatePoint = () => {
                         ))}
                     </ul>
                 </fieldset>
+                
                 <button type="submit">Cadastrar ponto de coleta</button>
             </form>
         </div>
